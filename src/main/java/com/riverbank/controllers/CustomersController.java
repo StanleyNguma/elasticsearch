@@ -5,10 +5,11 @@ package com.riverbank.controllers;
  * Created by @StanleyNguma on 29-Mar-17.
  */
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,12 +47,14 @@ public class CustomersController {
 
     @GetMapping(path="/all")
     public @ResponseBody String getAllCustomers() throws IOException {
-        // This returns a JSON or XML with the users
 
         try{
             // initialize the elastic search
-            Client client = TransportClient.builder().build()
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
+            Settings settings = Settings.builder()
+                    .put("client.transport.sniff", true).build();
+            TransportClient client = new PreBuiltTransportClient( settings )
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300))
+                    ;
 
             Iterable<Customers> customers_data = customersRepository.findAll();
 
